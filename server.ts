@@ -48,6 +48,22 @@ function getSavedProfiles(): InstagramProfileData[] {
   return [];
 }
 
+function deleteProfile(username: string): InstagramProfileData[] {
+  try {
+    ensureStorageDir();
+    const currentList = getSavedProfiles();
+    const cleanUser = username.toLowerCase().trim();
+    const remaining = currentList.filter(
+      (item) => item.username.toLowerCase().trim() !== cleanUser
+    );
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(remaining, null, 2), "utf-8");
+    return remaining;
+  } catch (err) {
+    console.error("Error deleting Instagram profile:", err);
+    return [];
+  }
+}
+
 function persistProfile(data: InstagramProfileData): { saved: InstagramProfileData; all: InstagramProfileData[] } {
   try {
     ensureStorageDir();
@@ -74,12 +90,16 @@ function persistProfile(data: InstagramProfileData): { saved: InstagramProfileDa
   }
 }
 
-// 5 Apify API key rotation pool
+// Apify API key rotation pool with support for APIFY_API_KEY, APIFY_TOKEN, and APIFY_API_KEY_1..5
 function getApifyKeys(): string[] {
   const keys: string[] = [];
+  const primary = process.env.APIFY_API_KEY?.trim() || process.env.APIFY_TOKEN?.trim();
+  if (primary && !keys.includes(primary)) {
+    keys.push(primary);
+  }
   for (let i = 1; i <= 5; i++) {
     const key = process.env[`APIFY_API_KEY_${i}`]?.trim();
-    if (key) {
+    if (key && !keys.includes(key)) {
       keys.push(key);
     }
   }
@@ -90,13 +110,14 @@ async function scrapeWithApify(
   username: string,
   keys: string[]
 ): Promise<{ data: InstagramProfileData | null; usedKeyIndex: number; error?: string }> {
-  for (let i = 0; i < keys.length; i++) {
+  const maxKeysToTry = Math.min(keys.length, 2);
+  for (let i = 0; i < maxKeysToTry; i++) {
     const key = keys[i];
     console.log(`[Apify Scraper] Attempting Apify API Key #${i + 1} for user @${username}...`);
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
 
       // Attempt primary actor: apify~instagram-profile-scraper
       let response = await fetch(
@@ -124,7 +145,7 @@ async function scrapeWithApify(
       if (!response.ok) {
         // Try fallback actor: apify~instagram-scraper
         const fallbackCtrl = new AbortController();
-        const fallbackTimeout = setTimeout(() => fallbackCtrl.abort(), 15000);
+        const fallbackTimeout = setTimeout(() => fallbackCtrl.abort(), 6000);
         response = await fetch(
           `https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${encodeURIComponent(key)}`,
           {
@@ -210,6 +231,18 @@ async function startServer() {
     }
   });
 
+  // Delete a saved profile
+  app.delete("/api/saved-instagram/:username", (req, res) => {
+    try {
+      const username = req.params.username;
+      const remaining = deleteProfile(username);
+      res.json({ success: true, all: remaining, message: `Removed @${username}` });
+    } catch (err: any) {
+      console.error("Delete profile error:", err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // API Endpoint: /api/instagram-lookup
   app.all("/api/instagram-lookup", async (req, res) => {
     try {
@@ -224,34 +257,6 @@ async function startServer() {
         username = username.split("instagram.com/")[1]?.split("/")[0]?.split("?")[0] || username;
       }
       username = username.replace(/[/?#].*$/, "").trim();
-
-      // Exact Match for Kyle's official verified profile (from Picture 2)
-      if (
-        username.toLowerCase() === "exclusive.kyle777" ||
-        username.toLowerCase().includes("exclusive.kyle") ||
-        username.toLowerCase() === "kyle"
-      ) {
-        const kyleProfile: InstagramProfileData = {
-          username: "exclusive.kyle777",
-          fullName: "Kyle =-",
-          externalUrl: "https://linktr.ee/kyledsllrc",
-          postsCount: 19,
-          followingCount: 37,
-          followersCount: 5367,
-          profilePicUrl: "/assets/kyle_ig_preview.jpg",
-          previewImageUrl: "/assets/kyle_ig_preview.jpg",
-          indexLabel: "1 of 1",
-          verifiedDemo: true,
-        };
-
-        const result = persistProfile(kyleProfile);
-        return res.json({
-          success: true,
-          data: result.saved,
-          all: result.all,
-          message: "Loaded & saved official verified profile for @exclusive.kyle777",
-        });
-      }
 
       const keys = getApifyKeys();
 
@@ -277,11 +282,11 @@ async function startServer() {
         username: username,
         fullName: username,
         externalUrl: `https://instagram.com/${username}`,
-        postsCount: 12,
-        followingCount: 88,
-        followersCount: 1420,
-        profilePicUrl: "/assets/kyle_ig_preview.jpg",
-        previewImageUrl: "/assets/kyle_ig_preview.jpg",
+        postsCount: 0,
+        followingCount: 0,
+        followersCount: 0,
+        profilePicUrl: "",
+        previewImageUrl: "",
         indexLabel: "1 of 1",
         verifiedDemo: false,
       };

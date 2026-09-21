@@ -8,11 +8,80 @@ interface FlameParticle {
   life: number;
   maxLife: number;
   size: number;
-  isEmber: boolean;
+  type: 'core' | 'flame' | 'ember';
 }
 
 interface DemonicCursorProps {
   enabled?: boolean;
+}
+
+// Pre-render hardware-cached glow sprites to achieve 0-lag rendering
+// Eliminates thousands of createRadialGradient GC allocations per second
+let cachedCoreSprite: HTMLCanvasElement | null = null;
+let cachedFlameSprite: HTMLCanvasElement | null = null;
+let cachedEmberSprite: HTMLCanvasElement | null = null;
+
+function getSprites() {
+  if (typeof document === 'undefined') return null;
+
+  if (!cachedCoreSprite) {
+    const size = 48;
+    const center = size / 2;
+
+    // 1. Core white-hot fire sprite
+    const c1 = document.createElement('canvas');
+    c1.width = size;
+    c1.height = size;
+    const ctx1 = c1.getContext('2d');
+    if (ctx1) {
+      const g = ctx1.createRadialGradient(center, center, 0, center, center, center);
+      g.addColorStop(0, 'rgba(255, 255, 230, 1)');
+      g.addColorStop(0.3, 'rgba(255, 200, 70, 0.9)');
+      g.addColorStop(0.7, 'rgba(255, 60, 10, 0.4)');
+      g.addColorStop(1, 'rgba(200, 20, 0, 0)');
+      ctx1.fillStyle = g;
+      ctx1.fillRect(0, 0, size, size);
+    }
+    cachedCoreSprite = c1;
+
+    // 2. Fiery crimson hellfire sprite
+    const c2 = document.createElement('canvas');
+    c2.width = size;
+    c2.height = size;
+    const ctx2 = c2.getContext('2d');
+    if (ctx2) {
+      const g = ctx2.createRadialGradient(center, center, 0, center, center, center);
+      g.addColorStop(0, 'rgba(255, 120, 20, 1)');
+      g.addColorStop(0.5, 'rgba(220, 30, 10, 0.65)');
+      g.addColorStop(0.85, 'rgba(120, 10, 5, 0.25)');
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx2.fillStyle = g;
+      ctx2.fillRect(0, 0, size, size);
+    }
+    cachedFlameSprite = c2;
+
+    // 3. Golden ember spark sprite
+    const c3 = document.createElement('canvas');
+    c3.width = 24;
+    c3.height = 24;
+    const ctx3 = c3.getContext('2d');
+    if (ctx3) {
+      const g = ctx3.createRadialGradient(12, 12, 0, 12, 12, 12);
+      g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      g.addColorStop(0.4, 'rgba(255, 215, 60, 0.95)');
+      g.addColorStop(0.8, 'rgba(255, 100, 20, 0.4)');
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx3.fillStyle = g;
+      ctx3.fillRect(0, 0, 24, 24);
+    }
+    cachedEmberSprite = c3;
+  }
+
+  return {
+    core: cachedCoreSprite,
+    flame: cachedFlameSprite,
+    ember: cachedEmberSprite
+  };
 }
 
 export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) => {
@@ -27,9 +96,10 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
     lastY: -200,
     vx: 0,
     vy: 0,
-    speed: 0,
+    tilt: 0,
     isDown: false,
-    visible: false
+    visible: false,
+    dirty: false
   });
 
   const particlesRef = useRef<FlameParticle[]>([]);
@@ -54,56 +124,50 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
     if (isTouch || !enabled) return;
 
     const m = mouseRef.current;
+    const particles = particlesRef.current;
 
-    // Instant zero-latency native event listeners: direct DOM transform update!
+    // Fast mouse events: update coordinates and spawn particles with zero garbage collection
     const onMouseMove = (e: MouseEvent) => {
       const clientX = e.clientX;
       const clientY = e.clientY;
 
       const dx = clientX - m.lastX;
       const dy = clientY - m.lastY;
-      const speed = Math.sqrt(dx * dx + dy * dy);
 
       m.x = clientX;
       m.y = clientY;
       m.lastX = clientX;
       m.lastY = clientY;
-      m.vx = dx * 0.4;
-      m.vy = dy * 0.4;
-      m.speed = Math.min(speed, 30);
+      m.vx = dx;
+      m.vy = dy;
+      m.tilt = Math.max(-14, Math.min(14, -dx * 0.35));
       m.visible = true;
+      m.dirty = true;
 
-      // INSTANT direct DOM transform update (0ms lag, no React re-render)
-      if (cursorRef.current) {
-        const tilt = Math.max(-14, Math.min(14, -dx * 0.4));
-        const scale = m.isDown ? 0.92 : 1;
-        cursorRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0) rotate(${tilt}deg) scale(${scale})`;
-        cursorRef.current.style.opacity = '1';
-      }
-
-      // Fast wake flame particle creation (limited to 2 per move event to keep 120fps)
-      if (particlesRef.current.length < 50) {
-        particlesRef.current.push({
+      // Spawn motion flame trail (capped at 40 active to ensure pure 60/120fps)
+      if (particles.length < 40) {
+        particles.push({
           x: clientX,
           y: clientY,
-          vx: -dx * 0.15 + (Math.random() - 0.5) * 1.2,
-          vy: -Math.random() * 2.5 - 1.2,
+          vx: -dx * 0.12 + (Math.random() - 0.5) * 1.0,
+          vy: -Math.random() * 2.2 - 1.0,
           life: 0,
-          maxLife: 16 + Math.random() * 12,
-          size: Math.random() * 6 + 4,
-          isEmber: false
+          maxLife: 14 + Math.random() * 8,
+          size: Math.random() * 7 + 4,
+          type: Math.random() > 0.4 ? 'core' : 'flame'
         });
 
-        if (Math.random() < 0.25) {
-          particlesRef.current.push({
-            x: clientX + (Math.random() - 0.5) * 4,
-            y: clientY + (Math.random() - 0.5) * 4,
-            vx: (Math.random() - 0.5) * 1.5,
-            vy: -Math.random() * 3 - 2,
+        // Occasional floating ember spark
+        if (Math.random() < 0.22) {
+          particles.push({
+            x: clientX + (Math.random() - 0.5) * 3,
+            y: clientY + (Math.random() - 0.5) * 3,
+            vx: (Math.random() - 0.5) * 1.4,
+            vy: -Math.random() * 2.8 - 1.8,
             life: 0,
-            maxLife: 24 + Math.random() * 16,
-            size: Math.random() * 2 + 1,
-            isEmber: true
+            maxLife: 20 + Math.random() * 12,
+            size: Math.random() * 3 + 1.5,
+            type: 'ember'
           });
         }
       }
@@ -111,41 +175,35 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
 
     const onMouseDown = (e: MouseEvent) => {
       m.isDown = true;
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) scale(0.9)`;
-      }
+      m.dirty = true;
 
-      // Click combustion burst (burst of 18 light particles)
-      for (let i = 0; i < 18; i++) {
+      // Click combustion burst: 14 lightweight particles
+      for (let i = 0; i < 14; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const spd = Math.random() * 5 + 2;
-        const isEmber = i % 3 === 0;
+        const spd = Math.random() * 4.5 + 1.5;
+        const isEmber = i % 2 === 0;
 
-        particlesRef.current.push({
+        particles.push({
           x: e.clientX,
           y: e.clientY,
           vx: Math.cos(angle) * spd,
-          vy: Math.sin(angle) * spd - 2,
+          vy: Math.sin(angle) * spd - 1.5,
           life: 0,
-          maxLife: isEmber ? 28 : 18,
-          size: isEmber ? 2 : 8,
-          isEmber
+          maxLife: isEmber ? 22 : 14,
+          size: isEmber ? 3 : 8,
+          type: isEmber ? 'ember' : 'core'
         });
       }
     };
 
-    const onMouseUp = (e: MouseEvent) => {
+    const onMouseUp = () => {
       m.isDown = false;
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) scale(1)`;
-      }
+      m.dirty = true;
     };
 
     const onMouseLeave = () => {
       m.visible = false;
-      if (cursorRef.current) {
-        cursorRef.current.style.opacity = '0';
-      }
+      m.dirty = true;
     };
 
     const onMouseEnter = (e: MouseEvent) => {
@@ -154,10 +212,7 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
       m.y = e.clientY;
       m.lastX = e.clientX;
       m.lastY = e.clientY;
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) scale(1)`;
-        cursorRef.current.style.opacity = '1';
-      }
+      m.dirty = true;
     };
 
     window.addEventListener('mousemove', onMouseMove, { passive: true });
@@ -175,7 +230,7 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
     };
   }, [enabled]);
 
-  // High-performance canvas animation loop for fluid fire (zero garbage collection)
+  // Synchronized VSync render loop with zero-allocation hardware sprite rendering
   useEffect(() => {
     const isTouch = window.matchMedia('(pointer: coarse)').matches;
     if (isTouch || !enabled) return;
@@ -184,6 +239,8 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
+
+    const sprites = getSprites();
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -195,74 +252,71 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
     let animId: number;
 
     const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       const m = mouseRef.current;
       const particles = particlesRef.current;
 
-      // Idle tip torch flame if mouse is stationary & visible
-      if (m.visible && m.x > 0 && Math.random() < 0.6 && particles.length < 40) {
+      // 1. Update Demonic Claw DOM position synchronized with VSync
+      if (cursorRef.current && m.visible) {
+        const scale = m.isDown ? 0.92 : 1;
+        cursorRef.current.style.transform = `translate3d(${m.x}px, ${m.y}px, 0) rotate(${m.tilt}deg) scale(${scale})`;
+        cursorRef.current.style.opacity = '1';
+      } else if (cursorRef.current && !m.visible) {
+        cursorRef.current.style.opacity = '0';
+      }
+
+      // 2. Idle torch flicker at claw tip when stationary
+      if (m.visible && m.x > 0 && Math.random() < 0.45 && particles.length < 32) {
         particles.push({
           x: m.x,
           y: m.y,
-          vx: (Math.random() - 0.5) * 0.8,
-          vy: -Math.random() * 2.4 - 1.2,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: -Math.random() * 2.0 - 0.8,
           life: 0,
-          maxLife: 16 + Math.random() * 8,
+          maxLife: 14 + Math.random() * 6,
           size: Math.random() * 5 + 3,
-          isEmber: false
+          type: 'core'
         });
       }
 
-      ctx.globalCompositeOperation = 'lighter';
+      // 3. Render particles if any exist
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.life++;
+      if (particles.length > 0 && sprites) {
+        ctx.globalCompositeOperation = 'lighter';
 
-        const progress = p.life / p.maxLife;
-        if (progress >= 1) {
-          particles.splice(i, 1);
-          continue;
-        }
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.life++;
 
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy -= 0.1; // buoyant updraft
-        p.vx *= 0.95;
-
-        const alpha = Math.sin(progress * Math.PI) * 0.85;
-
-        if (p.isEmber) {
-          ctx.fillStyle = `rgba(255, 215, 80, ${alpha})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * (1 - progress * 0.4), 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          // Thermodynamic flame color ramp
-          let r = 255, g = 255, b = 255;
-          if (progress < 0.25) {
-            r = 255; g = 240; b = 180;
-          } else if (progress < 0.6) {
-            r = 255; g = Math.floor(160 * (1 - progress)); b = 20;
-          } else {
-            r = Math.floor(220 * (1 - progress)); g = 20; b = 10;
+          const progress = p.life / p.maxLife;
+          if (progress >= 1) {
+            particles.splice(i, 1);
+            continue;
           }
 
-          const rad = p.size * (1 - progress * 0.6);
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
-          grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
-          grad.addColorStop(0.5, `rgba(${r}, ${Math.max(0, g - 60)}, 10, ${alpha * 0.7})`);
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy -= 0.08; // upward thermal draft
+          p.vx *= 0.96;
 
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
-          ctx.fill();
+          const alpha = Math.sin(progress * Math.PI) * 0.8;
+          ctx.globalAlpha = alpha;
+
+          const rad = p.size * (1 - progress * 0.5);
+          const drawSize = rad * 2;
+
+          let sprite: HTMLCanvasElement | null = sprites.core;
+          if (p.type === 'flame') sprite = sprites.flame;
+          else if (p.type === 'ember') sprite = sprites.ember;
+
+          if (sprite) {
+            ctx.drawImage(sprite, p.x - rad, p.y - rad, drawSize, drawSize);
+          }
         }
-      }
 
-      ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
 
       animId = requestAnimationFrame(render);
     };
@@ -280,15 +334,15 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
       {/* Real Hellfire Particle Canvas */}
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-[9998]"
+        className="hidden md:block fixed inset-0 pointer-events-none z-[9998]"
         style={{ pointerEvents: 'none' }}
       />
 
-      {/* Demonic Claw Pointer with 0ms direct DOM transform */}
+      {/* Demonic Claw Pointer with synchronized VSync transform */}
       <div
         ref={cursorRef}
         id="demonic-cursor"
-        className="fixed top-0 left-0 pointer-events-none z-[9999] select-none opacity-0"
+        className="hidden md:block fixed top-0 left-0 pointer-events-none z-[9999] select-none opacity-0"
         style={{
           transform: 'translate3d(-200px, -200px, 0)',
           transformOrigin: '2px 2px',

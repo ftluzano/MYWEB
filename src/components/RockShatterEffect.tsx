@@ -126,8 +126,19 @@ export const RockShatterEffect: React.FC = () => {
         dustPuffs
       });
 
+      // Cap max active shards and craters to prevent any frame drops on mobile devices
+      if (shardsRef.current.length > 60) {
+        shardsRef.current.splice(0, 25);
+      }
+      if (cratersRef.current.length > 6) {
+        cratersRef.current.shift();
+      }
+
       // 4. Spawn 3D polygonal rock shards with realistic physics
-      const shardCount = Math.floor(Math.random() * 8) + 18; // 18 to 26 realistic stones
+      const isTouch = window.matchMedia('(pointer: coarse)').matches;
+      const shardCount = isTouch
+        ? Math.floor(Math.random() * 5) + 11 // 11 to 15 stones on touch
+        : Math.floor(Math.random() * 8) + 18; // 18 to 26 stones on desktop
       const stonePalettes = [
         { light: '#44403c', dark: '#1c1917' }, // Basalt obsidian
         { light: '#57534e', dark: '#292524' }, // Granite grey
