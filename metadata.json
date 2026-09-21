@@ -1,0 +1,6 @@
+{
+  "name": "Kyle's Gothic Journal & Portfolio",
+  "description": "Professional dark gothic software engineering journal, systems architecture portfolio, and 5 crowned production platforms by Kyle Desilla Rico. Features the official theme song 'Athena's Anthem: Epic Battle Songs of Wisdom and War' with battle sound reactions on all link clicks, interactive stone shatter effects, and custom demonic cursor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
