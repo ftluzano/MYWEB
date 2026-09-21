@@ -85,7 +85,7 @@ export const InstagramDropModal: React.FC<InstagramDropModalProps> = ({
         onProfilesUpdated(updatedList);
         setUsernameInput('');
         setNewlyDroppedHandle(droppedProfile.username.toLowerCase());
-        setStatusMessage(`@${droppedProfile.username} popped onto the screen!`);
+        setStatusMessage(json.message || `@${droppedProfile.username} popped onto the screen!`);
 
         // Play impact audio
         gothicAudio.playWarriorLinkSound();
@@ -131,7 +131,7 @@ export const InstagramDropModal: React.FC<InstagramDropModalProps> = ({
         onProfilesUpdated(nextList);
         setUsernameInput('');
         setNewlyDroppedHandle(cleanName.toLowerCase());
-        setStatusMessage(`@${cleanName} dropped onto the screen!`);
+        setStatusMessage(postJson.message || `@${cleanName} dropped onto the screen!`);
 
         setTimeout(() => setNewlyDroppedHandle(null), 5000);
         setTimeout(() => setStatusMessage(null), 4000);
@@ -159,7 +159,7 @@ export const InstagramDropModal: React.FC<InstagramDropModalProps> = ({
       onProfilesUpdated(nextList);
       setUsernameInput('');
       setNewlyDroppedHandle(cleanName.toLowerCase());
-      setStatusMessage(`@${cleanName} popped onto the screen!`);
+      setStatusMessage(`@${cleanName} dropped onto the screen. Live scraper data is unavailable.`);
 
       setTimeout(() => setNewlyDroppedHandle(null), 5000);
       setTimeout(() => setStatusMessage(null), 4000);

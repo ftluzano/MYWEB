@@ -4,7 +4,16 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 
-dotenv.config();
+const envCandidates = [
+  path.join(process.cwd(), ".env.local"),
+  path.join(process.cwd(), ".env"),
+  path.join(process.cwd(), ".env.development"),
+  path.join(process.cwd(), ".env.production"),
+];
+
+for (const envPath of envCandidates) {
+  dotenv.config({ path: envPath });
+}
 
 export interface InstagramProfileData {
   username: string;
@@ -292,13 +301,16 @@ async function startServer() {
       };
 
       const result = persistProfile(userProfile);
+      const fallbackMessage = keys.length === 0
+        ? `No Apify key configured. Profile @${username} was saved as a local fallback card until you add APIFY_API_KEY or APIFY_API_KEY_1..5 in a .env file.`
+        : `Apify keys reached their limit or rejected the request. Profile @${username} was saved as a local fallback card.`;
+
       return res.json({
         success: true,
         data: result.saved,
         all: result.all,
-        message: keys.length === 0
-          ? `Profile @${username} dropped and saved permanently! (Configure Apify keys in Settings for live post counts)`
-          : `Apify keys reached limit; profile @${username} saved permanently!`,
+        source: keys.length === 0 ? "fallback-no-apify" : "fallback-apify-limit",
+        message: fallbackMessage,
       });
     } catch (error: any) {
       console.error("Instagram lookup error:", error);
@@ -314,6 +326,8 @@ async function startServer() {
       apifyKeysCount: getApifyKeys().length,
       savedCount: list.length,
       savedUsers: list.map((p) => p.username),
+      configured: getApifyKeys().length > 0,
+      envFiles: [".env", ".env.local", ".env.development", ".env.production"],
     });
   });
 
