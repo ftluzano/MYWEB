@@ -31,7 +31,7 @@ export const THEME_SONG_INFO = {
 class YouTubeThemeAudioManager {
   private player: any = null;
   private isPlaying = false;
-  private volume = 75;
+  private volume = 85;
   private containerId = 'youtube-theme-player-container';
   private hasInitialized = false;
   private gestureListenersInstalled = false;
