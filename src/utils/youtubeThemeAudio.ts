@@ -1,5 +1,5 @@
 // YouTube Theme Audio Manager
-// Track URL: https://www.youtube.com/watch?v=pDddlvCfTiw&list=RDpDddlvCfTiw&start_radio=1
+// Track URL: https://www.youtube.com/watch?v=S84HHJtKvRI&list=RDS84HHJtKvRI&start_radio=1
 
 declare global {
   interface Window {
@@ -24,8 +24,8 @@ declare global {
 }
 
 export const THEME_SONG_INFO = {
-  id: 'pDddlvCfTiw',
-  url: 'https://www.youtube.com/watch?v=pDddlvCfTiw&list=RDpDddlvCfTiw&start_radio=1'
+  id: 'S84HHJtKvRI',
+  url: 'https://www.youtube.com/watch?v=S84HHJtKvRI&list=RDS84HHJtKvRI&start_radio=1'
 };
 
 class YouTubeThemeAudioManager {
