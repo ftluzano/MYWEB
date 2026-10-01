@@ -5,7 +5,6 @@ import { RockShatterEffect } from './components/RockShatterEffect';
 import { RealisticLavaBackground } from './components/RealisticLavaBackground';
 import { DemonicCursor } from './components/DemonicCursor';
 import { YouTubeThemePlayer } from './components/YouTubeThemePlayer';
-import { ThemeSongWidget } from './components/ThemeSongWidget';
 import { WEBSITES } from './data/portfolioData';
 
 export function App() {
@@ -39,7 +38,6 @@ export function App() {
 
       {/* YouTube Background Theme Audio Engine & Responsive Widget */}
       <YouTubeThemePlayer />
-      <ThemeSongWidget />
 
     </div>
   );
