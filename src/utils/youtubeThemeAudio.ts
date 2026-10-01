@@ -37,7 +37,15 @@ class YouTubeThemeAudioManager {
   private gestureListenersInstalled = false;
 
   private readonly unlockPlayback = () => {
-    if (!this.isPlaying) this.play();
+    const playingState = window.YT?.PlayerState?.PLAYING;
+    const actualState = this.player?.getPlayerState?.();
+    if (!this.isPlaying || (playingState !== undefined && actualState !== playingState)) {
+      this.play();
+    }
+  };
+
+  private readonly handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') this.unlockPlayback();
   };
 
   public init() {
@@ -67,14 +75,7 @@ class YouTubeThemeAudioManager {
     window.addEventListener('click', this.unlockPlayback, { passive: true });
     window.addEventListener('touchstart', this.unlockPlayback, { passive: true });
     window.addEventListener('keydown', this.unlockPlayback, { passive: true });
-  }
-
-  private removeGestureListeners() {
-    if (!this.gestureListenersInstalled) return;
-    this.gestureListenersInstalled = false;
-    window.removeEventListener('click', this.unlockPlayback);
-    window.removeEventListener('touchstart', this.unlockPlayback);
-    window.removeEventListener('keydown', this.unlockPlayback);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
   private onApiReady() {
@@ -129,7 +130,6 @@ class YouTubeThemeAudioManager {
             if (window.YT && window.YT.PlayerState) {
               if (event.data === window.YT.PlayerState.PLAYING) {
                 this.isPlaying = true;
-                this.removeGestureListeners();
               } else if (event.data === window.YT.PlayerState.PAUSED) {
                 this.isPlaying = false;
               } else if (event.data === window.YT.PlayerState.ENDED) {
