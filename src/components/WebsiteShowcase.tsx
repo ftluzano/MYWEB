@@ -71,7 +71,7 @@ export const WebsiteShowcase: React.FC<WebsiteShowcaseProps> = ({ projects }) =>
         return <Bot className={size} />;
       case 'damon-affection':
         return <Heart className={size} />;
-      case 'quiz-damon':
+      case 'quizzy':
         return <Trophy className={size} />;
       case 'araw-ai':
         return <Sparkles className={size} />;
@@ -126,7 +126,7 @@ export const WebsiteShowcase: React.FC<WebsiteShowcaseProps> = ({ projects }) =>
 
             <span className="hidden sm:inline text-zinc-700">•</span>
             <span className="hidden sm:inline text-[10px] font-mono text-zinc-400">
-              System 0{currentIndex + 1} of 05
+              System 0{currentIndex + 1} of {String(projects.length).padStart(2, '0')}
             </span>
           </div>
 

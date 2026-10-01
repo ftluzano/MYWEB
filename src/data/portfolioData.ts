@@ -148,5 +148,16 @@ export const SOCIAL_LINKS = [
     description: 'Official correspondence, collaborations, and inquiries.',
     accent: '#ef4444',
     gothicLabel: 'Direct Crypt Seal'
+  },
+  {
+    name: 'Project D',
+    handle: 'Discord Bot',
+    url: 'https://discord.com/oauth2/authorize?client_id=1391786590921166878&permissions=6758727939747510&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fcallback&integration_type=0&scope=bot',
+    serverUrl: 'https://discord.com/invite/mFh8ZWmpR4',
+    commandsUrl: 'https://project-d-commands.vercel.app/',
+    icon: 'bot',
+    description: 'Invite the Discord bot or browse its commands.',
+    accent: '#5865f2',
+    gothicLabel: 'Discord Bot'
   }
 ];

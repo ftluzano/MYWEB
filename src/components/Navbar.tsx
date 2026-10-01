@@ -3,7 +3,7 @@ import kyleLogo from '../assets/images/kyle_stairs_portrait_1789984379217.jpg';
 
 export const Navbar: React.FC = () => {
   return (
-    <header className="w-full bg-[#08080c]/95 backdrop-blur-md border-b border-red-950/40 py-3 sm:py-3.5 pt-safe select-none sticky top-0 z-50">
+    <header className="mt-2 w-full bg-[#08080c]/95 backdrop-blur-md border-b border-red-950/40 py-2 sm:py-2.5 pt-safe select-none sticky top-2 z-50">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-center">
         {/* Brand: KYLE DOMAIN with custom Website Logo at the top */}
         <div className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer">

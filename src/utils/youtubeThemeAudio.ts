@@ -1,7 +1,5 @@
 // YouTube Theme Audio Manager
-// Track: "Athena's Anthem: Epic Battle Songs of Wisdom and War"
-// URL: https://www.youtube.com/watch?v=BD29wMAKiuI&list=OLAK5uy_naf3SE7V0iF_kn1Oix5JEx-twGVA2jq00&index=4
-// Video ID: BD29wMAKiuI | Playlist: OLAK5uy_naf3SE7V0iF_kn1Oix5JEx-twGVA2jq00
+// Track URL: https://www.youtube.com/watch?v=pDddlvCfTiw&list=RDpDddlvCfTiw&start_radio=1
 
 declare global {
   interface Window {
@@ -26,12 +24,8 @@ declare global {
 }
 
 export const THEME_SONG_INFO = {
-  id: 'BD29wMAKiuI',
-  playlistId: 'OLAK5uy_naf3SE7V0iF_kn1Oix5JEx-twGVA2jq00',
-  title: "Athena's Anthem: Epic Battle Songs of Wisdom and War",
-  shortTitle: "Athena's Anthem",
-  artist: 'Tout En Vrac',
-  url: 'https://www.youtube.com/watch?v=BD29wMAKiuI&list=OLAK5uy_naf3SE7V0iF_kn1Oix5JEx-twGVA2jq00&index=4'
+  id: 'pDddlvCfTiw',
+  url: 'https://www.youtube.com/watch?v=pDddlvCfTiw&list=RDpDddlvCfTiw&start_radio=1'
 };
 
 class YouTubeThemeAudioManager {

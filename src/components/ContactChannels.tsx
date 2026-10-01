@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, Mail, Instagram, Facebook, Copy, Check } from 'lucide-react';
+import { ExternalLink, Mail, Instagram, Facebook, Copy, Check, Bot } from 'lucide-react';
 import { SOCIAL_LINKS } from '../data/portfolioData';
 import { gothicAudio } from '../utils/audioEngine';
 
@@ -40,6 +40,13 @@ export const ContactChannels: React.FC = () => {
           accentBg: 'bg-red-950/40 border-red-800/40 text-red-400',
           radialGlow: 'from-red-600/25'
         };
+      case 'project d':
+        return {
+          icon: <Bot className="w-5 h-5 text-indigo-400" />,
+          glowClass: 'hover:shadow-[0_0_35px_rgba(88,101,242,0.35)] hover:border-indigo-500/60',
+          accentBg: 'bg-indigo-950/40 border-indigo-800/40 text-indigo-400',
+          radialGlow: 'from-indigo-600/25'
+        };
       default:
         return {
           icon: <Mail className="w-5 h-5 text-zinc-400" />,
@@ -53,7 +60,7 @@ export const ContactChannels: React.FC = () => {
   return (
     <div id="contact-channels" className="w-full max-w-4xl mx-auto mb-6">
       {/* 3 Contact Info Cards with Realistic Lighting, Reflections, and Tactile Depth */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {SOCIAL_LINKS.map(item => {
           const brand = getBrandDetails(item.name);
           const isCopied = copiedHandle === item.name;
@@ -83,7 +90,7 @@ export const ContactChannels: React.FC = () => {
 
                 {/* Username / Handle Centered with Copy Button */}
                 <div className="flex items-center justify-center gap-1.5 mb-3 sm:mb-3.5 max-w-full px-1">
-                  <span className="text-xs font-mono text-zinc-400 group-hover:text-zinc-200 truncate select-all transition-colors text-center">
+                  <span className="min-w-0 text-xs font-mono text-zinc-400 group-hover:text-zinc-200 truncate select-all transition-colors text-center">
                     {item.handle}
                   </span>
                   <button
@@ -101,17 +108,55 @@ export const ContactChannels: React.FC = () => {
               </div>
 
               {/* Single Centered CONNECT Action Button */}
-              <div className="relative z-10 pt-2.5 sm:pt-3 border-t border-zinc-800/80 w-full flex items-center justify-center">
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={handleLinkClick}
-                  className="w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-950 via-red-900 to-red-950 hover:from-red-900 hover:to-red-800 border border-red-700/80 text-xs font-gothic font-bold tracking-widest text-white shadow-[0_0_18px_rgba(220,38,38,0.4)] hover:shadow-[0_0_26px_rgba(220,38,38,0.7)] transition-all cursor-pointer active:scale-95 text-center group/btn"
-                >
-                  <span>CONNECT</span>
-                  <ExternalLink className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-                </a>
+              <div className="relative z-10 pt-2.5 sm:pt-3 border-t border-zinc-800/80 w-full">
+                {'commandsUrl' in item && 'serverUrl' in item ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={handleLinkClick}
+                      className="min-w-0 min-h-[40px] flex items-center justify-center gap-1 px-1.5 rounded-lg bg-gradient-to-r from-red-950 via-red-900 to-red-950 hover:from-red-900 hover:to-red-800 border border-red-700/80 text-[10px] font-gothic font-bold tracking-wide text-white transition-all cursor-pointer active:scale-95 text-center"
+                      title="Invite Project D bot to a server"
+                    >
+                      <span>BOT INVITE</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                    <a
+                      href={item.serverUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={handleLinkClick}
+                      className="min-w-0 min-h-[40px] flex items-center justify-center gap-1 px-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900/80 border border-indigo-700/70 text-[10px] font-gothic font-bold tracking-wide text-indigo-100 transition-all cursor-pointer active:scale-95 text-center"
+                      title="Join the Project D Discord server"
+                    >
+                      <span>JOIN SERVER</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                    <a
+                      href={item.commandsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={handleLinkClick}
+                      className="col-span-2 min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 rounded-lg bg-[#14141e] hover:bg-[#1c1c2a] border border-zinc-700 text-[10px] font-gothic font-bold tracking-widest text-zinc-100 transition-all cursor-pointer active:scale-95 text-center"
+                      title="Open Project D bot commands"
+                    >
+                      <span>BOT COMMANDS</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                  </div>
+                ) : (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleLinkClick}
+                    className="w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-950 via-red-900 to-red-950 hover:from-red-900 hover:to-red-800 border border-red-700/80 text-xs font-gothic font-bold tracking-widest text-white shadow-[0_0_18px_rgba(220,38,38,0.4)] hover:shadow-[0_0_26px_rgba(220,38,38,0.7)] transition-all cursor-pointer active:scale-95 text-center group/btn"
+                  >
+                    <span>CONNECT</span>
+                    <ExternalLink className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                  </a>
+                )}
               </div>
             </div>
           );

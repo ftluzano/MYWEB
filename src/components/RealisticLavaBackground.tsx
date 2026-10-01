@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 export const RealisticLavaBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -332,7 +333,7 @@ export const RealisticLavaBackground: React.FC = () => {
     };
   }, []);
 
-  return (
+  return createPortal((
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
       {/* 1. Hardware-accelerated GPU WebGL Lava Surface with vivid contrast */}
       <canvas
@@ -353,5 +354,5 @@ export const RealisticLavaBackground: React.FC = () => {
       {/* 4. Deep Volcanic Heat Radiance Core */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[550px] bg-gradient-to-r from-red-600/15 via-orange-500/20 to-amber-600/15 rounded-full blur-[130px] pointer-events-none" />
     </div>
-  );
+  ), document.body);
 };

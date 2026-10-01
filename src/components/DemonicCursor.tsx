@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 interface FlameParticle {
   x: number;
@@ -329,7 +330,7 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
     };
   }, [enabled]);
 
-  return (
+  return createPortal((
     <>
       {/* Real Hellfire Particle Canvas */}
       <canvas
@@ -456,5 +457,5 @@ export const DemonicCursor: React.FC<DemonicCursorProps> = ({ enabled = true }) 
         </div>
       </div>
     </>
-  );
+  ), document.body);
 };

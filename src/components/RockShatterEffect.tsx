@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { gothicAudio } from '../utils/audioEngine';
 
 interface RockShard {
@@ -348,11 +349,12 @@ export const RockShatterEffect: React.FC = () => {
     };
   }, []);
 
-  return (
+  return createPortal(
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-[9990]"
       style={{ pointerEvents: 'none' }}
-    />
+    />,
+    document.body
   );
 };

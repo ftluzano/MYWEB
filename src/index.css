@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  #root {
+    zoom: 0.8;
+  }
+}
+
 @layer base {
   :root {
     --font-cinzel: 'Cinzel', serif;
