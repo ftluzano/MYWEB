@@ -67,12 +67,20 @@ export const WebsiteShowcase: React.FC<WebsiteShowcaseProps> = ({ projects }) =>
     switch (id) {
       case 'school-anonymous':
         return <ShieldCheck className={size} />;
+      case 'foundlink-ptc':
+        return <Lock className={size} />;
+      case 'spill-it':
+        return <Heart className={size} />;
       case 'damon-ai':
         return <Bot className={size} />;
       case 'damon-affection':
         return <Heart className={size} />;
       case 'quizzy':
         return <Trophy className={size} />;
+      case 'guess-what':
+        return <Trophy className={size} />;
+      case 'zoryva-x':
+        return <Globe className={size} />;
       case 'araw-ai':
         return <Sparkles className={size} />;
       default:

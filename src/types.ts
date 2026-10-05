@@ -3,7 +3,7 @@ export interface ProjectWebsite {
   title: string;
   subtitle: string;
   url: string;
-  category: 'AI Platform' | 'Community' | 'Emotional AI' | 'Knowledge & Quiz' | 'Autonomous AI';
+  category: 'AI Platform' | 'Community' | 'Emotional AI' | 'Knowledge & Quiz' | 'Autonomous AI' | 'Campus Systems' | 'Realtime Game';
   crownTitle: string;
   crownType: 'obsidian' | 'crimson' | 'void' | 'arcane' | 'solar';
   tagline: string;
