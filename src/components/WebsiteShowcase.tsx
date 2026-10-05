@@ -91,7 +91,7 @@ export const WebsiteShowcase: React.FC<WebsiteShowcaseProps> = ({ projects }) =>
   return (
     <section id="featured-systems" className="w-full max-w-4xl mx-auto py-1">
       {/* 1. Compact Website Selection Tabs */}
-      <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-2.5 mb-3.5 no-scrollbar gap-2 px-1 touch-pan-x select-none">
+      <div className="flex items-center justify-start overflow-x-auto md:flex-wrap md:justify-center md:overflow-visible pb-2.5 mb-3.5 no-scrollbar gap-2 px-1 touch-pan-x select-none">
         {projects.map((p, idx) => {
           const isSelected = idx === currentIndex;
           return (
