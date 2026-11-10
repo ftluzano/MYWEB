@@ -91,7 +91,7 @@ export const HeroSection: React.FC = () => {
           onClick={() => scrollTo('school-anonymous')}
           className="px-6 py-3 rounded-lg bg-gradient-to-r from-red-950 via-red-900 to-zinc-900 hover:from-red-900 hover:to-red-950 border border-red-700/70 text-white font-gothic tracking-widest text-xs uppercase shadow-[0_0_20px_rgba(185,28,28,0.35)] transition-all transform hover:-translate-y-0.5 cursor-pointer"
         >
-          EXPLORE THE 5 WEBSITES
+          EXPLORE THE 11 WEBSITES
         </button>
 
         <button

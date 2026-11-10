@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, Mail, Instagram, Facebook, Copy, Check, Bot } from 'lucide-react';
+import { ExternalLink, Mail, Instagram, Facebook, Github, Copy, Check, Bot } from 'lucide-react';
 import { SOCIAL_LINKS } from '../data/portfolioData';
 import { gothicAudio } from '../utils/audioEngine';
 
@@ -32,6 +32,13 @@ export const ContactChannels: React.FC = () => {
           glowClass: 'hover:shadow-[0_0_35px_rgba(236,72,153,0.35)] hover:border-pink-500/60',
           accentBg: 'bg-pink-950/40 border-pink-800/40 text-pink-400',
           radialGlow: 'from-pink-600/25'
+        };
+      case 'github':
+        return {
+          icon: <Github className="w-5 h-5 text-zinc-100" />,
+          glowClass: 'hover:shadow-[0_0_35px_rgba(255,255,255,0.2)] hover:border-zinc-500/60',
+          accentBg: 'bg-zinc-800/60 border-zinc-600/50 text-zinc-100',
+          radialGlow: 'from-zinc-400/20'
         };
       case 'direct email':
         return {
