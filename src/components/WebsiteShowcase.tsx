@@ -8,6 +8,10 @@ import {
   ShieldCheck,
   Bot,
   Heart,
+  HeartPulse,
+  Accessibility,
+  BrainCircuit,
+  ContactRound,
   Trophy,
   Sparkles,
   Lock,
@@ -77,6 +81,16 @@ export const WebsiteShowcase: React.FC<WebsiteShowcaseProps> = ({ projects }) =>
         return <Trophy className={size} />;
       case 'araw-ai':
         return <Sparkles className={size} />;
+      case 'pateros-health-connect':
+        return <HeartPulse className={size} />;
+      case 'accessi-learn':
+        return <Accessibility className={size} />;
+      case 'acadpulse-ai':
+        return <BrainCircuit className={size} />;
+      case 'valkyr-directory':
+        return <ContactRound className={size} />;
+      case 'damon-gw':
+        return <Bot className={size} />;
       default:
         return <Globe className={size} />;
     }
